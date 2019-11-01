@@ -18,7 +18,6 @@ int numCounter = 0;
  
 TM1637Display display1(CLK, DIO); //set up the 4-Digit Display.
 TM1637Display display2(clk1,dio1);
-//TM1637Display display1(clk1, dio1); //set up the 4-Digit Display.
 TM1637Display  showDots();
  //******************************  4 digit 7 segment *********************************************************************
 
@@ -26,10 +25,10 @@ TM1637Display  showDots();
 
 
 // Update these with values suitable for your network.
-const char* ssid = "wi";//put your wifi ssid here
-const char* password = "HARICHAND";//put your wifi password here
+const char* ssid = "watch1";//put your wifi ssid here
+const char* password = "watch1234";//put your wifi password here
 const char* mqtt_server = "test.mosquitto.org";
-//const char* mqtt_server = "iot.eclipse.org";
+
 
 
 WiFiClient espClient;
@@ -39,7 +38,8 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 void setup_wifi() {
-   
+      
+
   // We start by connecting to a WiFi network
     Serial.print("Connecting to ");
     Serial.println(ssid);
@@ -59,6 +59,8 @@ void setup_wifi() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
+
+
 int state=1;
  uint8_t data[] = { 0xff, 0xff, 0xff, 0xff };
 void callback(char* topic, byte* payload, unsigned int length) 
@@ -68,16 +70,19 @@ void callback(char* topic, byte* payload, unsigned int length)
    Serial.println();
   Serial.print(" publish data is:");
   
-    if(payload[0]==0){
-         for(int f = 0; f < 4; f++) {
-    display1.setBrightness(7, false);  // Turn off
-    display1.setSegments(data);
-//    delay(TEST_DELAY);
-    
-  state=0;
-     return; 
-  }
-     }
+       if(payload[0]==0)
+        {
+             for(int f = 0; f < 4; f++) 
+                {
+                  display1.setBrightness(7, false);  // Turn off
+                  
+                  display2.setBrightness(7, false);  // Turn off
+                  
+
+                   state=0;
+                  return; 
+                }
+         }
 
   
   for(int i=0;i<length;i++)
@@ -88,7 +93,10 @@ void callback(char* topic, byte* payload, unsigned int length)
     if(payload[0]==1)
      {         for(int f = 0; f < 4; f++) {
           display1.setBrightness(7, true);  // Turn off
-          display1.setSegments(data);
+          
+             display2.setBrightness(7,true);  // Turn off
+                 
+
 //        delay(TEST_DELAY);
             state=2;
   
@@ -103,16 +111,17 @@ void callback(char* topic, byte* payload, unsigned int length)
      }
     
   }
-  Serial.println();
+ 
 
 } //end callback
 
- //end callback
+
+
 
 void reconnect() {
   // Loop until we're reconnected
  int b=0;
-  while (!client.connected()) 
+  for(int kj=0;kj<1;kj++)
   {
     Serial.print("Attempting MQTT connection...");
     // Create a random client ID
@@ -121,20 +130,16 @@ void reconnect() {
     // Attempt to connect
     //if you MQTT broker has clientID,username and password
     //please change following line to    if (client.connect(clientId,userName,passWord))
+    Serial.println("attempting");
+   
     if (client.connect(clientId.c_str()))
     {
       Serial.println("connected");
      //once connected to MQTT broker, subscribe command if any
       client.subscribe("OsoyooCommand");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 6 seconds before retrying
       
-    }
- 
-   break;
+    } 
+   
   }
 } //end reconnect()
 
@@ -178,9 +183,9 @@ void loop() {
   
   if(state==2){
       display1.setBrightness(0x0f);
-  display2.setBrightness(0x0f);
+  
      display1.setBrightness(7, true);  // Turn off
-    display1.setSegments(data);
+   
     state=1;
   }
   if(state==0){
@@ -190,7 +195,7 @@ void loop() {
     display1.setSegments(data);
      display2.setBrightness(7, false);  // Turn off
     display2.setSegments(data);
-//    delay(TEST_DELAY);
+
   
   continue;
   }
@@ -203,19 +208,7 @@ void loop() {
   k=1;
  
   DateTime now = RTC.now(); 
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(' ');
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println(); 
-    delay(900);
+   
     int hour1=now.hour();
     int minute1=now.minute();
     
@@ -233,18 +226,12 @@ void loop() {
 
      
     numCounter=((hour1*100)+minute1);
-    Serial.println(" time ti be displayed in rtc");
-    Serial.println(numCounter);
  
  
  display1.showNumberDecEx(numCounter, (0x80 >> k), true);
 sec=now.second();
-//display2.showNumberDec(sec, true, 2, 0);  // Expect: 04__
-//  display2.showNumberDec(0, true, 2, 2);  // Expect: 04__
    display2.showNumberDecEx(sec*100, (0x80 >> k), true);
 
-
- //display.showNumberDec(numCounter); //Display the numCounter value;
 
 
 
