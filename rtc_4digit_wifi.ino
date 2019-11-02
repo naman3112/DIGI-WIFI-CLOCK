@@ -53,7 +53,7 @@ void setup_wifi() {
       break;
    
     }
-  randomSeed(micros());
+  
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
@@ -139,7 +139,9 @@ void reconnect() {
       client.subscribe("OsoyooCommand");
       
     } 
-   
+   else{
+    Serial.println("not connected ");
+   }
   }
 } //end reconnect()
 
@@ -172,24 +174,34 @@ int sec;
 int p=0;
 int o=0;
 void loop() { 
- 
+  bool t=client.loop();
+Serial.println("chwch loop");
+Serial.println(t);
   if (!client.connected()) {
     reconnect();
       //client.setCallback(callback);
-
+  Serial.println("after reconnect");
   }
   o++;
+    Serial.println("before call back");
+
   client.setCallback(callback);
   
+    Serial.println("after callback");
   if(state==2){
+    
+    Serial.println("in state 2 ");
       display1.setBrightness(0x0f);
   
      display1.setBrightness(7, true);  // Turn off
    
     state=1;
+    
+    Serial.println("ends state");
   }
   if(state==0){
 
+    Serial.println("state 0");
            for(int f = 0; f < 4; f++) {
     display1.setBrightness(7, false);  // Turn off
     display1.setSegments(data);
@@ -197,15 +209,18 @@ void loop() {
     display2.setSegments(data);
 
   
+    Serial.println("after state 0");
   continue;
   }
   
   }
   
-  client.loop();
+ 
    
   
   k=1;
+  
+    Serial.println("before RTC");
  
   DateTime now = RTC.now(); 
    
@@ -234,6 +249,7 @@ sec=now.second();
 
 
 
+    Serial.println("after rtc");
 
 
 
