@@ -106,6 +106,8 @@ void callback(char* topic, byte* payload, unsigned int length)
       if(payload[1]==1)
          {
              RTC.adjust(DateTime(2019, 8, 26, payload[2],payload[3] , payload[4]));
+             Serial.println("i again want to reset ");
+             payload[1]=-1;
           }
           
      }
@@ -254,3 +256,4 @@ sec=now.second();
 
 
 }
+
